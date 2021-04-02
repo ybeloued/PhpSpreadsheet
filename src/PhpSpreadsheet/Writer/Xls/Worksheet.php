@@ -4398,15 +4398,6 @@ class Worksheet extends BIFFwriter
             $dataBlockFill = pack('v', $blockFillPatternStyle);
             $dataBlockFill .= pack('v', $colorIdxFg | ($colorIdxBg << 7));
         }
-        if ($bFormatProt == 1) {
-            $dataBlockProtection = 0;
-            if ($conditional->getStyle()->getProtection()->getLocked() == Protection::PROTECTION_PROTECTED) {
-                $dataBlockProtection = 1;
-            }
-            if ($conditional->getStyle()->getProtection()->getHidden() == Protection::PROTECTION_PROTECTED) {
-                $dataBlockProtection = 1 << 1;
-            }
-        }
 
         $data = pack('CCvvVv', $type, $operatorType, $szValue1, $szValue2, $flags, 0x0000);
         if ($bFormatFont == 1) { // Block Formatting : OK
@@ -4422,7 +4413,7 @@ class Worksheet extends BIFFwriter
             $data .= $dataBlockFill;
         }
         if ($bFormatProt == 1) {
-            $data .= $dataBlockProtection;
+            $data .= $this->getDataBlockProtection($conditional);
         }
         if ($operand1 !== null) {
             $data .= $operand1;
@@ -4485,5 +4476,18 @@ class Worksheet extends BIFFwriter
         $data .= pack('v', 0x0001);
         $data .= $cellRange;
         $this->append($header . $data);
+    }
+
+    private function getDataBlockProtection(Conditional $conditional): int
+    {
+        $dataBlockProtection = 0;
+        if ($conditional->getStyle()->getProtection()->getLocked() == Protection::PROTECTION_PROTECTED) {
+            $dataBlockProtection = 1;
+        }
+        if ($conditional->getStyle()->getProtection()->getHidden() == Protection::PROTECTION_PROTECTED) {
+            $dataBlockProtection = 1 << 1;
+        }
+
+        return $dataBlockProtection;
     }
 }

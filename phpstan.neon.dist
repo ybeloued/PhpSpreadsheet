@@ -6,3 +6,4 @@ parameters:
     scanDirectories:
         - vendor/jpgraph/jpgraph/lib/jpgraph/src
     ignoreErrors:
+        - '~^Class GdImage not found\.$~'
